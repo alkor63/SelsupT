@@ -25,16 +25,40 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class CrptApi {
 TimeUnit timeUnit;
 int requestLimit;
-
+Bucket bucket;
+    Bandwidth limit;
     public CrptApi(TimeUnit timeUnit, int requestLimit) {
         this.timeUnit = timeUnit;
         this.requestLimit = requestLimit;
+
+        limit = Bandwidth.classic(requestLimit,
+                Refill.greedy(requestLimit, Duration.of(1, this.timeUnit.toChronoUnit())));
+        bucket = Bucket4j.builder()
+                .addLimit(limit)
+                .build();
     }
+    public Bandwidth getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Bandwidth limit) {
+        this.limit = limit;
+    }
+
+    public Bucket getBucket() {
+        return bucket;
+    }
+
+    public void setBucket(Bucket bucket) {
+        this.bucket = bucket;
+    }
+
     private static String URL
 //            = "https://ismp.crpt.ru/api/v3/lk/documents/create";
             = "https://postman-echo.com/post"; // тест клиента
@@ -46,7 +70,7 @@ int requestLimit;
     private DocumentDTO documentDTO = new DocumentDTO();
     private static String sep = File.separator;
     private static final String filePath = "src" + sep + "main" + sep + "resources";
-    private String documentFileName;
+    private String documentFileName = "HonestSign";
     public static void main(String[] args) {
 
         String signature = "L123456789XXD";
@@ -57,10 +81,18 @@ int requestLimit;
                 true, "076-46565696", "076-89561234782",
                 "87-4567899", "2020-01-23", "dress", products,
                 "2020-01-23", "123456789");
-        CrptApi crptApi = new CrptApi(TimeUnit.MINUTES, 3);
+        int requestLimit = 5;
+
+        CrptApi crptApi = new CrptApi(TimeUnit.MINUTES, requestLimit);
+//        Bandwidth limit = Bandwidth.classic(requestLimit,
+//                Refill.greedy(requestLimit, Duration.of(1, timeUnit.toChronoUnit())));
+//        System.out.println("Limit = "+limit+" Duration = "+(Duration.of(1, timeUnit.toChronoUnit())));
+//        Bucket bucket = Bucket4j.builder()
+//                .addLimit(limit)
+//                .build();
         System.out.println("signature = "+signature);
         System.out.println("documentDTO = "+documentDTO);
-for (int i = 1; i<7; i++){
+for (int i = 1; i<8; i++){
     System.out.println("createDocument "+i);
         crptApi.createDocument(documentDTO, signature);
 }
@@ -86,13 +118,19 @@ for (int i = 1; i<7; i++){
 
 public void createDocument(DocumentDTO documentDTO, String signature) {
 //    private final Bucket bucket;
-    Bandwidth limit = Bandwidth.classic(requestLimit,
-            Refill.greedy(requestLimit, Duration.of(1, timeUnit.toChronoUnit())));
-    System.out.println("Limit = "+limit+" Duration = "+(Duration.of(1, timeUnit.toChronoUnit())));
-    Bucket bucket = Bucket4j.builder()
-            .addLimit(limit)
-            .build();
+
+//    Bandwidth limit = Bandwidth.classic(requestLimit,
+//            Refill.greedy(requestLimit, Duration.of(1, timeUnit.toChronoUnit())));
+//    System.out.println("Limit = "+limit+" Duration = "+(Duration.of(1, timeUnit.toChronoUnit())));
+//    Bucket bucket = Bucket4j.builder()
+//            .addLimit(limit)
+//            .build();
+
+    System.out.println("bucket = "+bucket.toString());
     ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+    System.out.println("probe = " + probe.toString());
+//    System.out.println("probe NUM  = " + probe.getRemainingTokens());
+//    System.out.println("probe time = " + (probe.getNanosToWaitForRefill() / 1_000_000_000));
     if (probe.isConsumed()) {
         String jsonDoc = docService.createDocumentJson(documentDTO);
         HttpRequest request = HttpRequest.newBuilder()
