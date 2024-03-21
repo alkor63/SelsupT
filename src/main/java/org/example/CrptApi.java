@@ -8,8 +8,6 @@ import io.github.bucket4j.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.http.HttpStatus;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -25,14 +23,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.Executors;
+import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
 public class CrptApi {
-TimeUnit timeUnit;
-int requestLimit;
-Bucket bucket;
+    TimeUnit timeUnit;
+    int requestLimit;
+    Bucket bucket;
     Bandwidth limit;
+
     public CrptApi(TimeUnit timeUnit, int requestLimit) {
         this.timeUnit = timeUnit;
         this.requestLimit = requestLimit;
@@ -42,21 +41,6 @@ Bucket bucket;
         bucket = Bucket4j.builder()
                 .addLimit(limit)
                 .build();
-    }
-    public Bandwidth getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Bandwidth limit) {
-        this.limit = limit;
-    }
-
-    public Bucket getBucket() {
-        return bucket;
-    }
-
-    public void setBucket(Bucket bucket) {
-        this.bucket = bucket;
     }
 
     private static String URL
@@ -71,97 +55,97 @@ Bucket bucket;
     private static String sep = File.separator;
     private static final String filePath = "src" + sep + "main" + sep + "resources";
     private String documentFileName = "HonestSign";
+
     public static void main(String[] args) {
 
-        String signature = "L123456789XXD";
+        String signatureSimple = "MySuperSecretSignature";
 
+        String signature = Base64.getEncoder().encodeToString((signatureSimple).getBytes());
+        System.out.println(signature);
+        System.out.println("Date = "+ LocalDate.now());
         List<ProductDTO> products = new ArrayList<>();
-
+        ProductDTO product1 = new ProductDTO(
+                "СГР", // документ о сертификации (сертификат) продукта
+                "2015-9-15", // дата сертификации (?) продукта
+                "RU.77.99.88.003.Е.00904", // номер сертификата на продукт
+                "7813562961", // ИНН владельца продукта
+                "7804063927", //  ИНН производителя продукта
+        "2024-1-15", // дата производства продукта
+                "2783801001", // код ТН ВЭД
+                "03920155", // код УКТ ВЭД
+               "3562"  // код УТ ВЭДУ
+        );
+        products.add(product1);
+        ProductDTO product2 = new ProductDTO("СГР",
+                "2015-08-26",
+                "RU.77.99.11.003.Е.008651.08.15",
+                "7813562961",
+                "7804063927",
+                "2024-2-15",
+                "2783801001",
+                "03920155",
+                "3562");
+        products.add(product2);
+        ProductDTO product3 = new ProductDTO("СГР",
+                "2015-08-24",
+                "RU.77.99.11.003.Е.008590.08.15",
+                "7813562961",
+                "7804063927",
+                "2024-3-15",
+                "2783801001",
+                "03920155",
+                "3562");
+        products.add(product3);
         DocumentDTO documentDTO = new DocumentDTO("FigZnayetChto", "ok", "LP_INTRODUCE_GOODS",
-                true, "076-46565696", "076-89561234782",
-                "87-4567899", "2020-01-23", "dress", products,
-                "2020-01-23", "123456789");
-        int requestLimit = 5;
-
+                true, "7813562961", "7813562961",
+                "7804063927", "2024-01-21", "БАД", products,
+                "2024-01-23", "123456789");
+        int requestLimit = 5;  // ограничение на число http запросов в единице времени
+//        TimeUnit.MINUTES - интервал времени на ограниченное число запросов
         CrptApi crptApi = new CrptApi(TimeUnit.MINUTES, requestLimit);
-//        Bandwidth limit = Bandwidth.classic(requestLimit,
-//                Refill.greedy(requestLimit, Duration.of(1, timeUnit.toChronoUnit())));
-//        System.out.println("Limit = "+limit+" Duration = "+(Duration.of(1, timeUnit.toChronoUnit())));
-//        Bucket bucket = Bucket4j.builder()
-//                .addLimit(limit)
-//                .build();
-        System.out.println("signature = "+signature);
-        System.out.println("documentDTO = "+documentDTO);
-for (int i = 1; i<8; i++){
-    System.out.println("createDocument "+i);
-        crptApi.createDocument(documentDTO, signature);
-}
-    }
-
-//class CreateDocumentController {
-//
-//    public CreateDocumentController() {
-//
-//    }
-////public ResponseEntity<AreaV1> rectangle(@RequestBody RectangleDimensionsV1 dimensions) {
-////        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-////        if (probe.isConsumed()) {
-////        return ResponseEntity.ok
-////                .header("X-Rate-Limit-Remaining", Long.toString(probe.getRemainingTokens()))
-////                .body(new AreaV1("rectangle", dimensions.getLength() * dimensions.getWidth()));
-////    }
-////        long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-////        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-////            .header("X-Rate-Limit-Retry-After-Seconds", String.valueOf(waitForRefill));
-////}
-//}
-
-public void createDocument(DocumentDTO documentDTO, String signature) {
-//    private final Bucket bucket;
-
-//    Bandwidth limit = Bandwidth.classic(requestLimit,
-//            Refill.greedy(requestLimit, Duration.of(1, timeUnit.toChronoUnit())));
-//    System.out.println("Limit = "+limit+" Duration = "+(Duration.of(1, timeUnit.toChronoUnit())));
-//    Bucket bucket = Bucket4j.builder()
-//            .addLimit(limit)
-//            .build();
-
-    System.out.println("bucket = "+bucket.toString());
-    ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-    System.out.println("probe = " + probe.toString());
-//    System.out.println("probe NUM  = " + probe.getRemainingTokens());
-//    System.out.println("probe time = " + (probe.getNanosToWaitForRefill() / 1_000_000_000));
-    if (probe.isConsumed()) {
-        String jsonDoc = docService.createDocumentJson(documentDTO);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL))
-                .POST(HttpRequest.BodyPublishers.ofString(jsonDoc))
-                .header("Authorization", "Basic " +
-                        Base64.getEncoder().encodeToString((signature).getBytes()))
-                .build();
-
-        HttpResponse<String> response = null;
-        try {
-            response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response != null && (response.statusCode() == 200 || response.statusCode() == 201)) {
-                System.out.println("Документ создан. HTTP Status Code: " + response.statusCode());
-//                System.out.println("Response Body: " + response.body());
-            } else {
-                System.err.println("Ошибка при создании документа. HTTP Status Code: " + response.statusCode() +
-                        "\n Повторите попытку или обратитесь в службу поддержки.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+// этот блок кода для проверки работы ограничителя скорости
+        for (int i = 1; i < 8; i++) {
+            System.out.println("createDocument " + i);
+            crptApi.createDocument(documentDTO, signature);
         }
-    } else {
-        long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;//переводим наносекунды в секунды
-//        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-        System.out.println("Превышен лимит частоты API запросов\n повторный запрос возможен через "
-                + String.valueOf(waitForRefill) + " секунд");
     }
-}
+
+    public void createDocument(DocumentDTO documentDTO, String signature) {
+
+        System.out.println("bucket = " + bucket.toString());
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        System.out.println("probe = " + probe.toString());
+
+        if (probe.isConsumed()) {
+            String jsonDoc = docService.createDocumentJson(documentDTO);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonDoc))
+                    .header("Authorization", "Basic " +
+                            Base64.getEncoder().encodeToString((signature).getBytes()))
+                    .build();
+
+            HttpResponse<String> response = null;
+            try {
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response != null && (response.statusCode() == 200 || response.statusCode() == 201)) {
+                    System.out.println("Документ создан. HTTP Status Code: " + response.statusCode());
+                } else {
+                    System.err.println("Ошибка при создании документа. HTTP Status Code: " + response.statusCode());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+//    в этот блок попадаем, если превышен лимит частоты запросов
+            long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;//переводим наносекунды в секунды
+            System.out.println("Превышен лимит частоты API запросов\n повторный запрос возможен через "
+                    + String.valueOf(waitForRefill) + " секунд");
+        }
+    }
+
     //************************************** DocumentService *****************************************************
     public class DocService {
         private final Mapper mapper = new Mapper();
@@ -169,12 +153,8 @@ public void createDocument(DocumentDTO documentDTO, String signature) {
 
         //**********************************************************************************************************
 
-        /**
-         * Метод для создания JSON-документа на основе объекта DocumentDTO.
-         *
-         * @param documentDto объект типа DocumentDTO
-         * @return JSON документ
-         */
+        // Метод для создания JSON-документа на основе объекта DocumentDTO.
+
         public String createDocumentJson(DocumentDTO documentDto) {
             DescriptionDTO description = mapper.createDocDescription(documentDto);
 //            createDocument(documentDto,sign);
@@ -187,11 +167,10 @@ public void createDocument(DocumentDTO documentDTO, String signature) {
             }
         }
     }
+
     public class FileService {
-        /**
+        /*
          * Метод для сохранения JSON-представления документа в файл.
-         *
-         * @param jsonDoc JSON-представление документа
          * @return true, если сохранение прошло успешно, иначе false
          */
         public boolean saveDocumentToFile(String jsonDoc, String docId) {
@@ -205,115 +184,72 @@ public void createDocument(DocumentDTO documentDTO, String signature) {
         }
     }
 
-    //************************************** DocumentService *****************************************************
-//    public class DocService {
-//        private final Mapper mapper = new Mapper();
-//        private final FileService fileService = new FileService();
-//
-//        //**********************************************************************************************************
-//
-//        /**
-//         * Метод для создания JSON-документа на основе объекта DocumentDTO.
-//         *
-//         * @param documentDto объект типа DocumentDTO
-//         * @return JSON документ
-//         */
-//        public String createDocumentJson(DocumentDTO documentDto) {
-//            DescriptionDTO descriptionDTO = mapper.createDocDescription(documentDto);
-////            createDocument(documentDto, signature);
-//            try {
-//                String json = new ObjectMapper().writeValueAsString(descriptionDTO);
-//                fileService.saveDocumentToFile(json, documentDto.getDoc_id());
-//                return json;
-//            } catch (JsonProcessingException e) {
-//                throw new RuntimeException("Ошибка при создании json.");
-//            }
-//        }
-//    }
-        //********************************** Mapper ****************************************************************************
-        private class Mapper {
-            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            private DescriptionDTO createDocDescription(DocumentDTO documentDTO) {
-                return new DescriptionDTO(
-                        new ParticipantInn(documentDTO.getParticipant_inn()),
-                        documentDTO.getDoc_id(),
-                        documentDTO.getDoc_status(),
-                        documentDTO.getDoc_type(),
-                        documentDTO.isImportRequest(),
-                        documentDTO.getOwner_inn(),
-                        documentDTO.getParticipant_inn(),
-                        documentDTO.getProducer_inn(),
-                        documentDTO.getProduction_date(),
-                        documentDTO.getProduction_type(),
-                        documentDTO.getProductsDTO(),
-                        documentDTO.getReg_date(),
-                        documentDTO.getReg_number()
-                );
-            }
-//            /**
-//             * Метод для преобразования объекта DocumentDTO в объект Document
-//             *
-//             * @param documentDTO
-//             * @return new Document()
-//             */
-//            private Document fromDtoToDocument(DocumentDTO documentDTO) {
-//                return new Document(
-//                        documentDTO.getDoc_id(),
-//                        documentDTO.getDoc_status(),
-//                        DocumentsType.valueOf(documentDTO.getDoc_type()),
-//                        documentDTO.isImportRequest(),
-//                        documentDTO.getOwner_inn(),
-//                        documentDTO.getParticipant_inn(),
-//                        documentDTO.getProducer_inn(),
-//                        LocalDate.parse(documentDTO.getProduction_date(), formatter),
-//                        documentDTO.getProduction_type(),
-//                        createProductListFromDto(documentDTO.getProducts()),
-//                        LocalDate.parse(documentDTO.getReg_date(), formatter),
-//                        documentDTO.getReg_number());
-//            }
-            private DocumentDTO fromDocumentToDto(Document document) {
-                return new DocumentDTO(
-                        document.getId(),
-                        document.getStatus(),
-                        document.getProduction_type(),
-                        document.isImportRequest(),
-                        document.getOwner_inn(),
-                        document.getParticipant_inn(),
-                        document.getProducer_inn(),
-                        document.getProduction_date().format(formatter),
-                        document.getProduction_type(),
-                        createProductDTOList(document.getProducts()),
-                        document.getReg_date().format(formatter),
-                        document.getReg_number());
-            }
+    //********************************** Mapper ****************************************************************************
+    private class Mapper {
+        private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        private DescriptionDTO createDocDescription(DocumentDTO documentDTO) {
+            return new DescriptionDTO(
+                    new ParticipantInn(documentDTO.getParticipant_inn()),
+                    documentDTO.getDoc_id(),
+                    documentDTO.getDoc_status(),
+                    documentDTO.getDoc_type(),
+                    documentDTO.isImportRequest(),
+                    documentDTO.getOwner_inn(),
+                    documentDTO.getParticipant_inn(),
+                    documentDTO.getProducer_inn(),
+                    documentDTO.getProduction_date(),
+                    documentDTO.getProduction_type(),
+                    documentDTO.getProductsDTO(),
+                    documentDTO.getReg_date(),
+                    documentDTO.getReg_number()
+            );
+        }
+
+        private DocumentDTO fromDocumentToDto(Document document) {
+            return new DocumentDTO(
+                    document.getId(),
+                    document.getStatus(),
+                    document.getProduction_type(),
+                    document.isImportRequest(),
+                    document.getOwner_inn(),
+                    document.getParticipant_inn(),
+                    document.getProducer_inn(),
+                    document.getProduction_date().format(formatter),
+                    document.getProduction_type(),
+                    createProductDTOList(document.getProducts()),
+                    document.getReg_date().format(formatter),
+                    document.getReg_number());
+        }
 
 
 //          Метод для создания списка объектов типа ProductDTO на основе списка объектов типа Product.
 
-            private List<ProductDTO> createProductDTOList(List<Product> productsList) {
+        private List<ProductDTO> createProductDTOList(List<Product> productsList) {
 
-                List<ProductDTO> productDTOList = new ArrayList<>();
-                for (Product product : productsList) {
-                    ProductDTO productDTO = fromProductToDTO(product);
-                    productDTOList.add(productDTO);
-                }
-                return productDTOList;
+            List<ProductDTO> productDTOList = new ArrayList<>();
+            for (Product product : productsList) {
+                ProductDTO productDTO = fromProductToDTO(product);
+                productDTOList.add(productDTO);
             }
-
-//              Метод для преобразования объекта Product в объект ProductDTO
-            private ProductDTO fromProductToDTO(Product product) {
-                return new ProductDTO(
-                        product.getCertificate_document(),
-                        product.getCertificate_document_date().format(formatter),
-                        product.getCertificate_document_number(),
-                        product.getOwner_inn(),
-                        product.getProducer_inn(),
-                        product.getProduction_date().format(formatter),
-                        product.getTnved_code(),
-                        product.getUit_code(),
-                        product.getUitu_code());
-            }
+            return productDTOList;
         }
+
+        //              Метод для преобразования объекта Product в объект ProductDTO
+        private ProductDTO fromProductToDTO(Product product) {
+            return new ProductDTO(
+                    product.getCertificate_document(),
+                    product.getCertificate_document_date().format(formatter),
+                    product.getCertificate_document_number(),
+                    product.getOwner_inn(),
+                    product.getProducer_inn(),
+                    product.getProduction_date().format(formatter),
+                    product.getTnved_code(),
+                    product.getUit_code(),
+                    product.getUitu_code());
+        }
+    }
+
     //******************************************** Classes ********************************************************
     @Data
     @AllArgsConstructor
@@ -321,7 +257,6 @@ public void createDocument(DocumentDTO documentDTO, String signature) {
     @JsonPropertyOrder({"description", "doc_id", "doc_status", "doc_type",
             "importRequest", "owner_inn", "participant_inn", "producer_inn", "production_date",
             "production_type", "products", "reg_date", "reg_number"})
-//    public static class Description1 {
     public static class Description {
         @JsonProperty("description")
         private ParticipantInn participantInn;
@@ -339,6 +274,7 @@ public void createDocument(DocumentDTO documentDTO, String signature) {
         private String reg_date;
         private String reg_number;
     }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -359,6 +295,7 @@ public void createDocument(DocumentDTO documentDTO, String signature) {
         private String reg_date;
         private String reg_number;
     }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

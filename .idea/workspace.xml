@@ -58,7 +58,7 @@
       <workItem from="1710945353449" duration="1178000" />
       <workItem from="1710947055434" duration="97000" />
       <workItem from="1710947164983" duration="295000" />
-      <workItem from="1710947546138" duration="24637000" />
+      <workItem from="1710947546138" duration="30212000" />
     </task>
     <task id="LOCAL-00001" summary="1st commit">
       <created>1710933738884</created>
@@ -81,7 +81,14 @@
       <option name="project" value="LOCAL" />
       <updated>1710975922041</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Прикрутил ограничение на скорость запросов">
+      <created>1711045641528</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1711045641528</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -91,22 +98,7 @@
     <MESSAGE value="1st commit" />
     <MESSAGE value="Добавил зависимости в pom.xml" />
     <MESSAGE value="Написал основную логику, начинаю отладку" />
-    <option name="LAST_COMMIT_MESSAGE" value="Написал основную логику, начинаю отладку" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/example/CrptApi.java</url>
-          <line>129</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/example/CrptApi.java</url>
-          <line>158</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Прикрутил ограничение на скорость запросов" />
+    <option name="LAST_COMMIT_MESSAGE" value="Прикрутил ограничение на скорость запросов" />
   </component>
 </project>
