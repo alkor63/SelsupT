@@ -4,13 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import io.github.bucket4j.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,9 +17,6 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -46,17 +41,14 @@ public class CrptApi {
                 .build();
     }
 
-    private static String URL
+    private final static String URL
 //            = "https://ismp.crpt.ru/api/v3/lk/documents/create";
             = "https://postman-echo.com/post"; // тест клиента
 
     HttpClient client = HttpClient.newHttpClient();
-    private static Mapper mapper = new Mapper();
-    private DocService docService = new DocService();
-//    private FileService fileService = new FileService();
-//    private DocumentDTO documentDTO = new DocumentDTO();
-//    private static String sep = File.separator;
-//    private static final String filePath = "src" + sep + "main" + sep + "resources";
+    private static final Mapper mapper = new Mapper();
+    private final DocService docService = new DocService();
+
 private static String documentFileName;
 
     public static void main(String[] args) {
@@ -102,10 +94,17 @@ private static String documentFileName;
                 "03920155",
                 "3562");
         products.add(product3);
-        Document document = new Document("ok", LP_INTRODUCE_GOODS,
-                true, "7813562961", "7813562961",
-                "7804063927",  "2024-01-21", "БАД", products,
-                "2023-11-19", "123456789");
+        Document document = new Document("ok",
+                LP_INTRODUCE_GOODS,
+                true,
+                "7813562961",
+                "7813562961",
+                "7804063927",
+                "2024-01-21",
+                "БАД",
+                products,
+                "2023-11-19",
+                "123456789");
 // ********** закончили с подготовкой информации для документа *****************
 // мапим в ДТО для записи в файл
 
@@ -134,29 +133,29 @@ private static String documentFileName;
                             Base64.getEncoder().encodeToString((signature).getBytes()))
                     .build();
 
-            HttpResponse<String> response = null;
             try {
-                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response != null && (response.statusCode() == 200 || response.statusCode() == 201)) {
                     System.out.println("Документ создан. HTTP Status Code: " + response.statusCode());
                 } else {
+                    assert response != null;
                     System.err.println("Ошибка при создании документа. HTTP Status Code: " + response.statusCode());
                 }
-            } catch (IOException e) {
+            } catch (NullPointerException | IOException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         } else {
 //    в этот блок попадаем, если превышен лимит частоты запросов
-            long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;//переводим наносекунды в секунды
+            long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000;//переводим наносекунды в секунды
             System.out.println("Превышен лимит частоты API запросов\n повторный запрос возможен через "
-                    + String.valueOf(waitForRefill) + " секунд");
+                    + waitForRefill + " ms");
         }
     }
 
     //************************************** DocumentService *****************************************************
-    public class DocService {
+    public static class DocService {
 
         private final FileService fileService = new FileService();
 
@@ -166,11 +165,9 @@ private static String documentFileName;
 
         public String createDocumentJson(DocumentDTO documentDto) {
             DescriptionDTO descriptionDTO = mapper.createDocDescription(documentDto);
+            ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
             try {
-                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                String json = ow.writeValueAsString(descriptionDTO);
-//              String json =  new ObjectMapper().writeValueAsString(descriptionDTO);
-//                String json = sss;
+                String json = objectMapper.writeValueAsString(descriptionDTO);
                 fileService.saveDocumentToFile(json, documentFileName);
                 return json;
             } catch (JsonProcessingException e) {
@@ -179,25 +176,25 @@ private static String documentFileName;
         }
     }
 
-    public class FileService {
+    public static class FileService {
         /*
          * Метод для сохранения JSON-представления документа в файл.
          * @return true, если сохранение прошло успешно, иначе false
          */
-        public boolean saveDocumentToFile(String jsonDoc, String FileName) {
+        public void saveDocumentToFile(String jsonDoc, String FileName) {
             try {
                 Files.writeString(Path.of(FileName), jsonDoc);
-                return true;
+//                return true;
             } catch (IOException e) {
                 e.printStackTrace();
-                return false;
+//                return false;
             }
         }
     }
 
     //********************************** Mapper ****************************************************************************
     private static class Mapper {
-        private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         private DescriptionDTO createDocDescription(DocumentDTO documentDTO) {
             return new DescriptionDTO(
@@ -221,15 +218,15 @@ private static String documentFileName;
             return new DocumentDTO(
                     document.getId(),
                     document.getStatus(),
-                    document.getProduction_type(),
+                    document.getDoc_type(),
                     document.isImportRequest(),
                     document.getOwner_inn(),
                     document.getParticipant_inn(),
                     document.getProducer_inn(),
-                    LocalDate.parse(document.getProduction_date(), formatter),
+                    document.getProduction_date(),
                     document.getProduction_type(),
                     createProductDTOList(document.getProducts()),
-                    LocalDate.parse(document.getReg_date(), formatter),
+                    document.getReg_date(),
                     document.getReg_number());
         }
 
@@ -250,11 +247,11 @@ private static String documentFileName;
         private ProductDTO fromProductToDTO(Product product) {
             return new ProductDTO(
                     product.getCertificate_document(),
-                    LocalDate.parse(product.getCertificate_document_date(), formatter),
+                    product.getCertificate_document_date(),
                     product.getCertificate_document_number(),
                     product.getOwner_inn(),
                     product.getProducer_inn(),
-                    LocalDate.parse(product.getProduction_date(), formatter),
+                    product.getProduction_date(),
                     product.getTnved_code(),
                     product.getUit_code(),
                     product.getUitu_code());
@@ -262,28 +259,28 @@ private static String documentFileName;
     }
 
     //******************************************** Classes ********************************************************
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonPropertyOrder({"description", "doc_id", "doc_status", "doc_type",
-            "importRequest", "owner_inn", "participant_inn", "producer_inn", "production_date",
-            "production_type", "products", "reg_date", "reg_number"})
-    public static class Description {
-        @JsonProperty("description")
-        private ParticipantInn participantInn;
-        private String doc_id;
-        private String doc_status;
-        private String doc_type;
-        private boolean importRequest;
-        private String owner_inn;
-        private String participant_inn;
-        private String producer_inn;
-        private String production_date;
-        private String production_type;
-        private List<Product> products;
-        private String reg_date;
-        private String reg_number;
-    }
+//    @Data
+//    @AllArgsConstructor
+//    @NoArgsConstructor
+//    @JsonPropertyOrder({"description", "doc_id", "doc_status", "doc_type",
+//            "importRequest", "owner_inn", "participant_inn", "producer_inn", "production_date",
+//            "production_type", "products", "reg_date", "reg_number"})
+//    public static class Description {
+//        @JsonProperty("description")
+//        private ParticipantInn participantInn;
+//        private String doc_id;
+//        private String doc_status;
+//        private DocumentsType doc_type;
+//        private boolean importRequest;
+//        private String owner_inn;
+//        private String participant_inn;
+//        private String producer_inn;
+//        private String production_date;
+//        private String production_type;
+//        private List<Product> products;
+//        private String reg_date;
+//        private String reg_number;
+//    }
 
     @Data
     @AllArgsConstructor
@@ -296,15 +293,15 @@ private static String documentFileName;
         private ParticipantInn participantInn;
         private String doc_id;
         private String doc_status;
-        private String doc_type;
+        private DocumentsType doc_type;
         private boolean importRequest;
         private String owner_inn;
         private String participant_inn;
         private String producer_inn;
-        private LocalDate production_date;
+        private String production_date;
         private String production_type;
         private List<ProductDTO> products;
-        private LocalDate reg_date;
+        private String reg_date;
         private String reg_number;
     }
 
@@ -314,15 +311,15 @@ private static String documentFileName;
     public static class DocumentDTO {
         private String doc_id;
         private String doc_status;
-        private String doc_type;
+        private DocumentsType doc_type;
         private boolean importRequest;
         private String owner_inn;
         private String participant_inn;
         private String producer_inn;
-        private LocalDate production_date;
+        private String production_date;
         private String production_type;
         private List<ProductDTO> productsDTO;
-        private LocalDate reg_date;
+        private String reg_date;
         private String reg_number;
     }
 
@@ -331,11 +328,11 @@ private static String documentFileName;
     @AllArgsConstructor
     public static class ProductDTO {
         private String certificate_document; // документ о сертификации (сертификат) продукта
-        private LocalDate certificate_document_date; // дата сертификации (?) продукта
+        private String certificate_document_date; // дата сертификации (?) продукта
         private String certificate_document_number; // номер сертификата на продукт
         private String owner_inn; // ИНН владельца продукта
         private String producer_inn; //  ИНН производителя продукта
-        private LocalDate production_date; // дата производства продукта
+        private String production_date; // дата производства продукта
         private String tnved_code; // код ТН ВЭД
         private String uit_code; // код УКТ ВЭД
         private String uitu_code; // код УТ ВЭДУ
@@ -399,6 +396,6 @@ private static String documentFileName;
     }
 
     public enum DocumentsType {
-        LP_INTRODUCE_GOODS;
+        LP_INTRODUCE_GOODS
     }
 }
