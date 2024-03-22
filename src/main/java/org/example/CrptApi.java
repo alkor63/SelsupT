@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.example.CrptApi.DocumentsType.LP_INTRODUCE_GOODS;
-
+@NoArgsConstructor
 public class CrptApi {
     TimeUnit timeUnit;
     int requestLimit;
@@ -46,7 +46,7 @@ public class CrptApi {
             = "https://postman-echo.com/post"; // тест клиента
 
     HttpClient client = HttpClient.newHttpClient();
-    private static final Mapper mapper = new Mapper();
+    static final Mapper mapper = new Mapper();
     private final DocService docService = new DocService();
 
 private static String documentFileName;
@@ -114,7 +114,8 @@ private static String documentFileName;
 //        TimeUnit.MINUTES - интервал времени на ограниченное число запросов
         CrptApi crptApi = new CrptApi(TimeUnit.MINUTES, requestLimit);
 // этот блок кода для проверки работы ограничителя скорости
-        for (int i = 1; i < 8; i++) {
+        int needRequests = 7;
+        for (int i = 1; i <= needRequests; i++) {
             System.out.println("createDocument " + i);
             crptApi.createDocument(documentDTO, signature);
         }
@@ -181,19 +182,17 @@ private static String documentFileName;
          * Метод для сохранения JSON-представления документа в файл.
          * @return true, если сохранение прошло успешно, иначе false
          */
-        public void saveDocumentToFile(String jsonDoc, String FileName) {
+        public void saveDocumentToFile(String jsonDoc, String fileName) {
             try {
-                Files.writeString(Path.of(FileName), jsonDoc);
-//                return true;
+                Files.writeString(Path.of(fileName), jsonDoc);
             } catch (IOException e) {
                 e.printStackTrace();
-//                return false;
             }
         }
     }
 
     //********************************** Mapper ****************************************************************************
-    private static class Mapper {
+    public static class Mapper {
 //        private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         private DescriptionDTO createDocDescription(DocumentDTO documentDTO) {
@@ -214,7 +213,7 @@ private static String documentFileName;
             );
         }
 
-        private DocumentDTO fromDocumentToDto(Document document) {
+         DocumentDTO fromDocumentToDto(Document document) {
             return new DocumentDTO(
                     document.getId(),
                     document.getStatus(),
@@ -233,7 +232,7 @@ private static String documentFileName;
 
 //          Метод для создания списка объектов типа ProductDTO на основе списка объектов типа Product.
 
-        private List<ProductDTO> createProductDTOList(List<Product> productsList) {
+        List<ProductDTO> createProductDTOList(List<Product> productsList) {
 
             List<ProductDTO> productDTOList = new ArrayList<>();
             for (Product product : productsList) {
@@ -244,7 +243,7 @@ private static String documentFileName;
         }
 
         //              Метод для преобразования объекта Product в объект ProductDTO
-        private ProductDTO fromProductToDTO(Product product) {
+        ProductDTO fromProductToDTO(Product product) {
             return new ProductDTO(
                     product.getCertificate_document(),
                     product.getCertificate_document_date(),
@@ -383,7 +382,7 @@ private static String documentFileName;
 
     @Data
     @AllArgsConstructor
-    private static class Product {
+    static class Product {
         private String certificate_document; // документ о сертификации (сертификат) продукта
         private String certificate_document_date; // дата сертификации (?) продукта
         private String certificate_document_number; // номер сертификата на продукт
