@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import io.github.bucket4j.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,13 +19,15 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
+
+import static org.example.CrptApi.DocumentsType.LP_INTRODUCE_GOODS;
 
 public class CrptApi {
     TimeUnit timeUnit;
@@ -48,58 +51,66 @@ public class CrptApi {
             = "https://postman-echo.com/post"; // тест клиента
 
     HttpClient client = HttpClient.newHttpClient();
-
+    private static Mapper mapper = new Mapper();
     private DocService docService = new DocService();
-    private FileService fileService = new FileService();
-    private DocumentDTO documentDTO = new DocumentDTO();
-    private static String sep = File.separator;
-    private static final String filePath = "src" + sep + "main" + sep + "resources";
-    private String documentFileName = "HonestSign";
+//    private FileService fileService = new FileService();
+//    private DocumentDTO documentDTO = new DocumentDTO();
+//    private static String sep = File.separator;
+//    private static final String filePath = "src" + sep + "main" + sep + "resources";
+private static String documentFileName;
 
     public static void main(String[] args) {
-
+        try {
+            documentFileName = args[0];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            documentFileName = "HonestSign.json";
+            System.out.println("Результат запишем в файл по-умолчанию: "+documentFileName);
+        }
+// outname - имя файла для записи результатов
         String signatureSimple = "MySuperSecretSignature";
-
         String signature = Base64.getEncoder().encodeToString((signatureSimple).getBytes());
-        System.out.println(signature);
-        System.out.println("Date = "+ LocalDate.now());
-        List<ProductDTO> products = new ArrayList<>();
-        ProductDTO product1 = new ProductDTO(
+        List<Product> products = new ArrayList<>();
+        Product product1 = new Product(
                 "СГР", // документ о сертификации (сертификат) продукта
-                "2015-9-15", // дата сертификации (?) продукта
+                "2015-09-15", // дата сертификации (?) продукта
                 "RU.77.99.88.003.Е.00904", // номер сертификата на продукт
                 "7813562961", // ИНН владельца продукта
                 "7804063927", //  ИНН производителя продукта
-        "2024-1-15", // дата производства продукта
+        "2024-01-15", // дата производства продукта
                 "2783801001", // код ТН ВЭД
                 "03920155", // код УКТ ВЭД
                "3562"  // код УТ ВЭДУ
         );
         products.add(product1);
-        ProductDTO product2 = new ProductDTO("СГР",
+        Product product2 = new Product("СГР",
                 "2015-08-26",
                 "RU.77.99.11.003.Е.008651.08.15",
                 "7813562961",
                 "7804063927",
-                "2024-2-15",
+                "2024-02-15",
                 "2783801001",
                 "03920155",
                 "3562");
         products.add(product2);
-        ProductDTO product3 = new ProductDTO("СГР",
+        Product product3 = new Product("СГР",
                 "2015-08-24",
                 "RU.77.99.11.003.Е.008590.08.15",
                 "7813562961",
                 "7804063927",
-                "2024-3-15",
+                "2024-03-15",
                 "2783801001",
                 "03920155",
                 "3562");
         products.add(product3);
-        DocumentDTO documentDTO = new DocumentDTO("FigZnayetChto", "ok", "LP_INTRODUCE_GOODS",
+        Document document = new Document("ok", LP_INTRODUCE_GOODS,
                 true, "7813562961", "7813562961",
-                "7804063927", "2024-01-21", "БАД", products,
-                "2024-01-23", "123456789");
+                "7804063927",  "2024-01-21", "БАД", products,
+                "2023-11-19", "123456789");
+// ********** закончили с подготовкой информации для документа *****************
+// мапим в ДТО для записи в файл
+
+        DocumentDTO documentDTO = mapper.fromDocumentToDto(document);
+// ********** вводим ограничение скорости POST запросов *******************
         int requestLimit = 5;  // ограничение на число http запросов в единице времени
 //        TimeUnit.MINUTES - интервал времени на ограниченное число запросов
         CrptApi crptApi = new CrptApi(TimeUnit.MINUTES, requestLimit);
@@ -108,14 +119,12 @@ public class CrptApi {
             System.out.println("createDocument " + i);
             crptApi.createDocument(documentDTO, signature);
         }
+// при таких вводных 5 запросов должно отработать, а 2 попросят подождать
     }
 
     public void createDocument(DocumentDTO documentDTO, String signature) {
 
-        System.out.println("bucket = " + bucket.toString());
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
-        System.out.println("probe = " + probe.toString());
-
         if (probe.isConsumed()) {
             String jsonDoc = docService.createDocumentJson(documentDTO);
             HttpRequest request = HttpRequest.newBuilder()
@@ -148,7 +157,7 @@ public class CrptApi {
 
     //************************************** DocumentService *****************************************************
     public class DocService {
-        private final Mapper mapper = new Mapper();
+
         private final FileService fileService = new FileService();
 
         //**********************************************************************************************************
@@ -156,11 +165,13 @@ public class CrptApi {
         // Метод для создания JSON-документа на основе объекта DocumentDTO.
 
         public String createDocumentJson(DocumentDTO documentDto) {
-            DescriptionDTO description = mapper.createDocDescription(documentDto);
-//            createDocument(documentDto,sign);
+            DescriptionDTO descriptionDTO = mapper.createDocDescription(documentDto);
             try {
-                String json = new ObjectMapper().writeValueAsString(description);
-                fileService.saveDocumentToFile(json, documentDto.getDoc_id());
+                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                String json = ow.writeValueAsString(descriptionDTO);
+//              String json =  new ObjectMapper().writeValueAsString(descriptionDTO);
+//                String json = sss;
+                fileService.saveDocumentToFile(json, documentFileName);
                 return json;
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Ошибка при создании json.");
@@ -173,9 +184,9 @@ public class CrptApi {
          * Метод для сохранения JSON-представления документа в файл.
          * @return true, если сохранение прошло успешно, иначе false
          */
-        public boolean saveDocumentToFile(String jsonDoc, String docId) {
+        public boolean saveDocumentToFile(String jsonDoc, String FileName) {
             try {
-                Files.writeString(Path.of(filePath, docId + ".json"), jsonDoc);
+                Files.writeString(Path.of(FileName), jsonDoc);
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -185,7 +196,7 @@ public class CrptApi {
     }
 
     //********************************** Mapper ****************************************************************************
-    private class Mapper {
+    private static class Mapper {
         private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         private DescriptionDTO createDocDescription(DocumentDTO documentDTO) {
@@ -215,10 +226,10 @@ public class CrptApi {
                     document.getOwner_inn(),
                     document.getParticipant_inn(),
                     document.getProducer_inn(),
-                    document.getProduction_date().format(formatter),
+                    LocalDate.parse(document.getProduction_date(), formatter),
                     document.getProduction_type(),
                     createProductDTOList(document.getProducts()),
-                    document.getReg_date().format(formatter),
+                    LocalDate.parse(document.getReg_date(), formatter),
                     document.getReg_number());
         }
 
@@ -239,11 +250,11 @@ public class CrptApi {
         private ProductDTO fromProductToDTO(Product product) {
             return new ProductDTO(
                     product.getCertificate_document(),
-                    product.getCertificate_document_date().format(formatter),
+                    LocalDate.parse(product.getCertificate_document_date(), formatter),
                     product.getCertificate_document_number(),
                     product.getOwner_inn(),
                     product.getProducer_inn(),
-                    product.getProduction_date().format(formatter),
+                    LocalDate.parse(product.getProduction_date(), formatter),
                     product.getTnved_code(),
                     product.getUit_code(),
                     product.getUitu_code());
@@ -260,7 +271,6 @@ public class CrptApi {
     public static class Description {
         @JsonProperty("description")
         private ParticipantInn participantInn;
-
         private String doc_id;
         private String doc_status;
         private String doc_type;
@@ -278,10 +288,12 @@ public class CrptApi {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @JsonPropertyOrder({"description", "doc_id", "doc_status", "doc_type",
+            "importRequest", "owner_inn", "participant_inn", "producer_inn", "production_date",
+            "production_type", "products", "reg_date", "reg_number"})
     public static class DescriptionDTO {
-        @JsonProperty("descriptionDTO")
+        @JsonProperty("description")
         private ParticipantInn participantInn;
-
         private String doc_id;
         private String doc_status;
         private String doc_type;
@@ -289,10 +301,10 @@ public class CrptApi {
         private String owner_inn;
         private String participant_inn;
         private String producer_inn;
-        private String production_date;
+        private LocalDate production_date;
         private String production_type;
         private List<ProductDTO> products;
-        private String reg_date;
+        private LocalDate reg_date;
         private String reg_number;
     }
 
@@ -307,10 +319,10 @@ public class CrptApi {
         private String owner_inn;
         private String participant_inn;
         private String producer_inn;
-        private String production_date;
+        private LocalDate production_date;
         private String production_type;
         private List<ProductDTO> productsDTO;
-        private String reg_date;
+        private LocalDate reg_date;
         private String reg_number;
     }
 
@@ -319,11 +331,11 @@ public class CrptApi {
     @AllArgsConstructor
     public static class ProductDTO {
         private String certificate_document; // документ о сертификации (сертификат) продукта
-        private String certificate_document_date; // дата сертификации (?) продукта
+        private LocalDate certificate_document_date; // дата сертификации (?) продукта
         private String certificate_document_number; // номер сертификата на продукт
         private String owner_inn; // ИНН владельца продукта
         private String producer_inn; //  ИНН производителя продукта
-        private String production_date; // дата производства продукта
+        private LocalDate production_date; // дата производства продукта
         private String tnved_code; // код ТН ВЭД
         private String uit_code; // код УКТ ВЭД
         private String uitu_code; // код УТ ВЭДУ
@@ -338,32 +350,49 @@ public class CrptApi {
 
     @Data
     @AllArgsConstructor
-    @NoArgsConstructor
     public static class Document {
-        private String id; // id документа
+            private  int idGenerator = 0;
+        private final String id; // id документа
         private String status; // статус документа
         private DocumentsType doc_type; // тип документа
         private boolean importRequest; // флаг запрос на импорт
         private String owner_inn; // ИНН владельца
         private String participant_inn; // ИНН участника
         private String producer_inn; // ИНН производителя
-        private LocalDate production_date; // дата производства
+        private String production_date; // дата производства
         private String production_type; // тип производства (?)
         private List<Product> products; // инфо о продуктах
-        private LocalDate reg_date; // дата регистрации документа
+        private String reg_date; // дата регистрации документа
         private String reg_number; // регистрационный номер
+
+        public Document(String status, DocumentsType doc_type, boolean importRequest,
+                        String owner_inn, String participant_inn, String producer_inn,
+                        String production_date, String production_type,
+                        List<Product> products, String reg_date, String reg_number) {
+                        this.id = String.valueOf(++idGenerator);
+            this.status = status;
+            this.doc_type = doc_type;
+            this.importRequest = importRequest;
+            this.owner_inn = owner_inn;
+            this.participant_inn = participant_inn;
+            this.producer_inn = producer_inn;
+            this.production_date = production_date;
+            this.production_type = production_type;
+            this.products = products;
+            this.reg_date = reg_date;
+            this.reg_number = reg_number;
+        }
     }
 
     @Data
-    @NoArgsConstructor
     @AllArgsConstructor
     private static class Product {
         private String certificate_document; // документ о сертификации (сертификат) продукта
-        private LocalDate certificate_document_date; // дата сертификации (?) продукта
+        private String certificate_document_date; // дата сертификации (?) продукта
         private String certificate_document_number; // номер сертификата на продукт
         private String owner_inn; // ИНН владельца продукта
         private String producer_inn; //  ИНН производителя продукта
-        private LocalDate production_date; // дата производства продукта
+        private String production_date; // дата производства продукта
         private String tnved_code; // код ТН ВЭД
         private String uit_code; // код УКТ ВЭД
         private String uitu_code; // код УТ ВЭДУ
