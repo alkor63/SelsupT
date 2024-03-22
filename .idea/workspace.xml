@@ -4,16 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e7130a7f-e9f8-44df-8bda-e51fbe2fc2d5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-    </list>
+    <list default="true" id="e7130a7f-e9f8-44df-8bda-e51fbe2fc2d5" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="JUnit5 Test Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2dwyoqATzBIBl7VDRvQEz45UcQt" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -25,9 +39,107 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false"
+    "WebServerToolWindowFactoryState": "false",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
+    "settings.editor.selected.configurable": "http.proxy"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CreateTestDialog.Recents.Supers">
+      <recent name="" />
+    </key>
+    <key name="CreateTestDialog.RecentsKey">
+      <recent name="org.example" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.CrptApi">
+    <configuration name="CrptApi" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="org.example.CrptApi" />
+      <module name="Selsup" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CrptApiTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Selsup" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example" />
+      <option name="MAIN_CLASS_NAME" value="org.example.CrptApiTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CrptApiTest.createDocumentTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Selsup" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example" />
+      <option name="MAIN_CLASS_NAME" value="org.example.CrptApiTest" />
+      <option name="METHOD_NAME" value="createDocumentTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CrptApiTest.createProductDTOListTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Selsup" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example" />
+      <option name="MAIN_CLASS_NAME" value="org.example.CrptApiTest" />
+      <option name="METHOD_NAME" value="createProductDTOListTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CrptApiTest.speedRequestTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="Selsup" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.example" />
+      <option name="MAIN_CLASS_NAME" value="org.example.CrptApiTest" />
+      <option name="METHOD_NAME" value="speedRequestTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.CrptApi" />
+        <item itemvalue="JUnit.CrptApiTest" />
+        <item itemvalue="JUnit.CrptApiTest.speedRequestTest" />
+        <item itemvalue="JUnit.CrptApiTest.createProductDTOListTest" />
+        <item itemvalue="JUnit.CrptApiTest.createDocumentTest" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -36,10 +148,88 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1710933612362</updated>
+      <workItem from="1710933614577" duration="322000" />
+      <workItem from="1710933949137" duration="2069000" />
+      <workItem from="1710945353449" duration="1178000" />
+      <workItem from="1710947055434" duration="97000" />
+      <workItem from="1710947164983" duration="295000" />
+      <workItem from="1710947546138" duration="30445000" />
+      <workItem from="1711052706313" duration="1352000" />
+      <workItem from="1711058376285" duration="15838000" />
+      <workItem from="1711122335664" duration="10291000" />
+      <workItem from="1711135137035" duration="3169000" />
     </task>
+    <task id="LOCAL-00001" summary="1st commit">
+      <created>1710933738884</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1710933738884</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Добавил зависимости в pom.xml">
+      <created>1710934226239</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1710934226239</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Написал основную логику, начинаю отладку">
+      <created>1710975922041</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1710975922041</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Прикрутил ограничение на скорость запросов">
+      <created>1711045641528</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1711045641528</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Создал несколько продуктов и документ для записи">
+      <created>1711052451856</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1711052451856</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Вычищаю отладочный код">
+      <created>1711067018483</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1711067018483</updated>
+    </task>
+    <task id="LOCAL-00007" summary="output Json полностью соответствует ТЗ">
+      <created>1711111727427</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1711111727427</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Добавил тесты">
+      <created>1711137219764</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1711137219764</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="1st commit" />
+    <MESSAGE value="Добавил зависимости в pom.xml" />
+    <MESSAGE value="Написал основную логику, начинаю отладку" />
+    <MESSAGE value="Прикрутил ограничение на скорость запросов" />
+    <MESSAGE value="Создал несколько продуктов и документ для записи" />
+    <MESSAGE value="Вычищаю отладочный код" />
+    <MESSAGE value="output Json полностью соответствует ТЗ" />
+    <MESSAGE value="Добавил тесты" />
+    <option name="LAST_COMMIT_MESSAGE" value="Добавил тесты" />
   </component>
 </project>
